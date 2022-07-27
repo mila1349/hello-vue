@@ -1,13 +1,22 @@
 <script>
+import Name from './Name.vue'
+import Card from './Card.vue'
+import axios from 'axios'
+
 export default {
+  components: {
+    Name,
+    Card
+  },
   data(){
         return{
-            firstName:'Mila',
+            name:"Mila",
             count:0,
             red:false,
             selectedBook:"",
             books: [{ book: 'The crown prince' }, { book: 'Six crimson cranes' }, { book: 'The wrath and the down' }, { book: 'The school for bad and evil' }],
-            message:""
+            message:"",
+            images:[]
         }
     },
     //normal methods like in javascript
@@ -19,7 +28,10 @@ export default {
       },
     //do task only when component mounted (useEffect in react)
     mounted() {
-        this.increment()
+        this.increment(),
+        axios
+        .get('https://pixabay.com/api/?key=28396945-a04af5e9d646708057f745571&q=books&image_type=photo&pretty=true')
+        .then(response => (this.images=response.data.hits))
     },
     //method to update data to be dynamic (cannot add parameters)(like setState in react)
     computed:{
@@ -41,19 +53,22 @@ export default {
             }
         }
     },
+    provide:{
+      username:"Mila123"
+    }
 }
 
 </script>
 
 <template>
   <div class="container">
-    <h1>Hello {{firstName}}!</h1>
+    <Name :name="this.name" id="my-Name"/>
     <h2>{{message}}</h2>
-    <button @click="increment" :id="dynamicId" :class="[button,{ red: redButton }]" ref="btn">{{ count }}</button>
+    <button @click="increment()" :id="dynamicId" :class="[button,{ red: redButton }]" ref="btn">{{ count }}</button>
     <p>Has published books:</p>
     <span :style="{'color':redButton?'red':''}">{{ countMany }}</span>
     <ul>
-      <li  v-if="redButton" v-for="(item, index) in books">
+      <li v-if="redButton" v-for="(item, index) in books">
         Book-{{index+1}} {{item.book}}
       </li>
     </ul>
@@ -63,6 +78,10 @@ export default {
         {{item.book}}
       </option>
     </select>
+    <p>Async with axios => pixabay api</p>
+    <Card v-for="(item, index) in images">
+      <img :src="item.previewURL"/>
+    </Card>
   </div>
 </template>
 
@@ -75,5 +94,8 @@ export default {
     padding: 0.5;
     border: none;
     border-radius: 12px;
+}
+img{
+  width:300px
 }
 </style>
